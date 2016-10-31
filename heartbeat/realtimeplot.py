@@ -15,7 +15,8 @@ class RealtimePlot:
         self.max_entries = max_entries
         self.lineplot, = self.axes.plot([], [], "b-")
         self.axes.set_ylim(0,100)
-        fig.canvas.mpl_connect('button_press_event', onclick)
+        self.fig = fig
+        self.fig.canvas.mpl_connect('button_press_event', onclick)
         #self.axes.set_autoscaley_on(True)
 
     def add(self, x, y):
@@ -23,13 +24,18 @@ class RealtimePlot:
         self.axis_y.append(y)
         self.lineplot.set_data(self.axis_x, self.axis_y)
         self.axes.set_xlim(self.axis_x[0], self.axis_x[0] + 15)
+        self.fig.canvas.update()
+        self.fig.canvas.flush_events()
+        #self.fig.draw()
+        #self.fig.canvas.flush_events()
         #self.axes.relim(); self.axes.autoscale_view() # rescale the y-axis
 
 
 def main():
     display = RealtimePlot()
+    plt.show(block=False)
     while True:
         display.add(time.time() - start, random.random() * 100)
-        plt.pause(0.001)
+        plt.pause(0.0000000000000001)
 
 if __name__ == "__main__": main()
