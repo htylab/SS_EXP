@@ -29,7 +29,7 @@ plt.show(block=False)
 fig.canvas.mpl_connect('button_press_event', onclick)
 ax.set_ylim(0,1000)
 ptime = time.time()
-
+#please check your arduino port 
 strPort='com3'
 # plot parameters
 print ('plotting data...')
@@ -47,7 +47,8 @@ while True:
     ax.set_xlim(display.axis_x[0], display.axis_x[0] + 5)
     ax.draw_artist(ax.patch)
     ax.draw_artist(line)
-    fig.canvas.update()
+    #fig.canvas.update()
+    fig.canvas.draw()
     fig.canvas.flush_events()
     delta = time.time()-ptime
     ptime = time.time()
