@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SS_final_b10907012</title>
+    <style type="text/css">
+        .chartBox {
+            width: 600px;
+            display: flex;
+            margin-left: 250px;
+            margin-right: 250px;
+        }
+        canvas {
+            margin: 50px; 
+        }
+    </style>
+</head>
+<body>
+    <div class="chartBox">
+        <canvas id="myChart1" width="600" height="300" margin='100'></canvas>
+        <canvas id="myChart2" width="600" height="300"></canvas>
+    </div>
+    <div class="chartBox">
+        <canvas id="myChart4" width="600" height="300"></canvas>
+        <canvas id="myChart3" width="600" height="300"></canvas>
+    </div>
+    <style>
+        #heart_rate {
+            text-align: center;
+            font-size: 50px;
+        }
+    </style>
+    <div id="heart_rate">Heart Rate: </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+
+        var myChart1 = new Chart(document.getElementById('myChart1').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    data: [],
+                    borderWidth: 3,
+                    borderColor:'rgba(75, 192, 192, 1)',
+                    pointRadius:0
+                }]
+            },
+            options: {
+                animation: {
+                    duration: 0
+                },
+                scales: {
+                    y: { 
+                        min: 0,
+                        max: 500
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'time[s]'
+                        }
+                    }
+                },
+                plugins :{
+                    title: {
+                        display: true,
+                        font: {
+                            size: 30
+                        },
+                        text: 'Input Signal'
+                    },
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+        var myChart2 = new Chart(document.getElementById('myChart2').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: [],  
+                datasets: [{
+                    data: [],
+                    borderWidth: 3,
+                    borderColor:'rgba(75, 192, 192, 1)',
+                    pointRadius:0
+                }]
+            },
+            options: {
+                animation: {
+                    duration: 0 
+                },
+                scales: {
+                    x: {
+                        suggestedMin: -100,
+                        suggestedMax: 100,
+                        title: {
+                            display: true,
+                            text: 'frequency[Hz]'
+                        }
+                    },
+                    y: { 
+                        min: 0,
+                        max: 500
+                    }
+                },
+                plugins :{
+                    title: {
+                        display: true,
+                        font: {
+                            size: 30
+                        },
+                        text: 'Spectrum of Input Signal'
+                    },
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+        var myChart3 = new Chart(document.getElementById('myChart3').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: [], 
+                datasets: [{
+                    data: [],
+                    borderWidth: 3,
+                    borderColor:'rgba(75, 192, 192, 1)',
+                    pointRadius:0
+                }]
+            },
+            options: {
+                animation: {
+                    duration: 0 
+                },
+                scales: {
+                    x: {
+                        suggestedMin: -100,
+                        suggestedMax: 100,
+                        title: {
+                            display: true,
+                            text: 'frequency[Hz]'
+                        }
+                    },
+                    y: { 
+                        min: 0,
+                        max: 500
+                    }
+                },
+                plugins :{
+                    title: {
+                        display: true,
+                        font: {
+                            size: 30
+                        },
+                        text: 'Spectrum of Output Signal'
+                    },
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+        var myChart4 = new Chart(document.getElementById('myChart4').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: [],  
+                datasets: [{
+                    data: [],
+                    borderWidth: 3,
+                    borderColor:'rgba(75, 192, 192, 1)',
+                    pointRadius:0
+                },{
+                    label: 'Scatter Points',
+                    data: [], 
+                    borderColor: 'rgba(255, 0, 0, 1)',
+                    backgroundColor: 'rgba(255, 0, 0, 1)',
+                    pointRadius: 5,
+                    showLine: false,
+                    fill: false
+                }]
+            },
+            options: {
+                animation: {
+                    duration: 0
+                },
+                scales: {
+                    y: { 
+                        min: 0,
+                        max: 200
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'time[s]'
+                        }
+                    }
+                },
+                plugins :{
+                    title: {
+                        display: true,
+                        font: {
+                            size: 30
+                        },
+                        text: 'Output Signal Signal'
+                    },
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        socket.on('update_data', function(res) {
+            myChart1.data.labels = res.time;
+            myChart1.data.datasets[0].data = res.heartin;
+            myChart2.data.labels = res.x2;
+            myChart2.data.datasets[0].data = res.y2;
+            myChart3.data.labels = res.x3;
+            myChart3.data.datasets[0].data = res.y3;
+            myChart4.data.labels = res.x4;
+            myChart4.data.datasets[0].data = res.y4;
+            var p = res.y4.map((value, index) => (res.peaks[index] === 1 ? value : 0));
+            myChart4.data.datasets[1].data = p;
+            document.getElementById('heart_rate').innerHTML = 'Heart Rate: ' + res.hr + 'bpm';
+
+            myChart1.update();
+            myChart2.update();
+            myChart3.update();
+            myChart4.update();
+        });
+    </script>
+</body>
+</html>
